@@ -2,35 +2,49 @@ import streamlit as st
 import google.generativeai as genai
 import os
 
-# 1. Page Configuration
-st.set_page_config(page_title="Sal Z Master OS", page_icon="🤖")
-st.title("🤖 Sal Z Master OS")
+# --- 1. CONFIGURATION ---
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-# 2. API Setup
-genai.configure(api_key=api_key)
-# Try using the model name without 'models/' prefix or just the ID
-model = genai.GenerativeModel('gemini-1.5-flash')1.5-flash-latest')
+st.set_page_config(page_title="Sal Z Master OS", layout="wide")
+st.title('🤖 Sal Z | Master Operating System')
 
-# 3. Initialize Chat History
+# --- 2. SKILL MODULES (CLOUD COMPATIBLE) ---
+def execute_spange_search(query):
+    # Search locally within the deployed folder
+    data_path = "Project_Data" 
+    if not os.path.exists(data_path):
+        return "Archival data folder not found."
+    
+    results = []
+    for filename in os.listdir(data_path):
+        with open(os.path.join(data_path, filename), 'r') as f:
+            content = f.read()
+            if query.lower() in content.lower():
+                results.append(f"Found in {filename}: {content[:200]}...")
+    
+    return "\n".join(results) if results else "No records found."
+
+# --- 3. CORE INTERFACE ---
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": "Sal Z online. How can I assist with the film production or tour logistics today?"}
-    ]
+    st.session_state.messages = []
 
-# 4. Display Chat History
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-# 5. The Chat Engine
-if prompt := st.chat_input("Enter command..."):
-    # Add user message
+# --- 4. EXECUTION LOOP ---
+if prompt := st.chat_input("Master Command:"):
+    st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
 
-    # Generate AI Response
+    # AI Logic
+    if "spange" in prompt.lower() or "ledger" in prompt.lower():
+        response = execute_spange_search(prompt)
+    else:
+        response = model.generate_content(prompt).text
+
     with st.chat_message("assistant"):
-        response = model.generate_content(prompt)
-        st.markdown(response.text)
-        st.session_state.messages.append({"role": "assistant", "content": response.text})
+        st.markdown(response)
+    
+    st.session_state.messages.append({"role": "assistant", "content": response})
