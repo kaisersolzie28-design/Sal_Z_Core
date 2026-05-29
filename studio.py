@@ -6,14 +6,10 @@ import os
 st.set_page_config(page_title="Sal Z Master OS", page_icon="🤖")
 st.title("🤖 Sal Z Master OS")
 
-# 2. API Setup (Pulls from Streamlit Secrets)
-api_key = os.environ.get("GEMINI_API_KEY")
-if not api_key:
-    st.error("API Key not found. Please set GEMINI_API_KEY in Streamlit Secrets.")
-    st.stop()
-
+# 2. API Setup
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Try using the model name without 'models/' prefix or just the ID
+model = genai.GenerativeModel('gemini-1.5-flash')1.5-flash-latest')
 
 # 3. Initialize Chat History
 if "messages" not in st.session_state:
